@@ -188,7 +188,7 @@ function App() {
       }
     } catch (error) {
       console.error("Error al cargar categorías:", error);
-      setCategorias([]); // No usar datos de ejemplo
+      setCategorias([]); 
     }
   };
 
