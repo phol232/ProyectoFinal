@@ -84,7 +84,7 @@ const authenticatedRequest = async (url: string, options: any = {}) => {
   const config: RequestInit = {
     method: options.method || 'GET',
     headers,
-    credentials: "include", 
+    credentials: "include", // Si usas cookies o algo más
   };
 
   // SOLO PARA DEBUG: imprime headers y options
@@ -188,7 +188,7 @@ function App() {
       }
     } catch (error) {
       console.error("Error al cargar categorías:", error);
-      setCategorias([]); 
+      setCategorias([]); // No usar datos de ejemplo
     }
   };
 
@@ -253,6 +253,8 @@ function App() {
     if (categoriaSeleccionada === null) {
       return coincideBusqueda;
     }
+
+    // AJUSTA AQUÍ: usar producto.categoria.id en lugar de producto.categoria_id
     const coincideCategoria = producto.categoria && producto.categoria.id === categoriaSeleccionada;
 
     return coincideBusqueda && coincideCategoria;
@@ -436,26 +438,48 @@ function Header({
   usuario: Usuario | null;
   onLogout: () => void;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setMenuOpen(false);
+    }
+  };
+
   return (
     <header className="header">
       <div className="container">
         <div className="logo">
-          <span className="logo-icon">🍽️</span>
-          <span className="logo-text">UPTOWN</span>
+          <span className="logo-icon">🥖</span>
+          <span className="logo-text">PANADERÍA DELICIAS</span>
         </div>
         <nav className="nav">
-          <a href="#home">Home</a>
-          <a href="#about">About us</a>
-          <a href="#menu">Menu</a>
-          <a href="#contact">Contact us</a>
+          <a onClick={() => scrollToSection('inicio')}>Inicio</a>
+          <a onClick={() => scrollToSection('nosotros')}>Nosotros</a>
+          <a onClick={() => scrollToSection('menu')}>Productos</a>
+          <a onClick={() => scrollToSection('contacto')}>Contacto</a>
         </nav>
         <div className="header-right">
           <div className="contact-info">
-            <span>📞 +593 32 345 19 30</span>
+            <span>📞 +593 2 456 78 90</span>
           </div>
           <UserMenu usuario={usuario} onLogout={onLogout} />
+          <button 
+            className="menu-toggle"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            ☰
+          </button>
         </div>
       </div>
+      <nav className={`nav-mobile ${menuOpen ? 'active' : ''}`}>
+        <a onClick={() => scrollToSection('inicio')}>Inicio</a>
+        <a onClick={() => scrollToSection('nosotros')}>Nosotros</a>
+        <a onClick={() => scrollToSection('menu')}>Productos</a>
+        <a onClick={() => scrollToSection('contacto')}>Contacto</a>
+      </nav>
     </header>
   );
 }
@@ -491,24 +515,24 @@ function HeroSection() {
       <div className="hero-content">
         <div className="hero-text">
           <h1>
-            Check out our gourmet <span className="highlight">Menu:</span>
+            Descubre nuestros <span className="highlight">Productos Frescos:</span>
           </h1>
           <div className="hero-stats">
             <div className="stat">
-              <span className="stat-number">100+</span>
-              <span className="stat-label">Daily Dishes</span>
+              <span className="stat-number">50+</span>
+              <span className="stat-label">Productos Diarios</span>
             </div>
             <div className="stat">
-              <span className="stat-number">50+</span>
-              <span className="stat-label">Professional Chef</span>
+              <span className="stat-number">25+</span>
+              <span className="stat-label">Años de Experiencia</span>
             </div>
           </div>
-          <button className="btn-learn-more">Learn more</button>
+          <button className="btn-learn-more">Conoce más</button>
         </div>
         <div className="hero-image">
           <img
-            src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500&h=500&fit=crop"
-            alt="Gourmet dish"
+            src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&h=500&fit=crop"
+            alt="Pan artesanal"
           />
         </div>
       </div>
@@ -550,11 +574,13 @@ function MainPage({
 }) {
   return (
     <div className="main-page">
-      <HeroSection />
+      <section id="inicio">
+        <HeroSection />
+      </section>
 
       <section className="menu-section" id="menu">
         <div className="container">
-          <h2 className="section-title">You may like one of our dishes:</h2>
+          <h2 className="section-title">Te puede gustar uno de nuestros productos:</h2>
 
           {/* Buscador y Filtros */}
           <div className="filters-section">
@@ -576,7 +602,7 @@ function MainPage({
                   setCategoriaSeleccionada(null);
                 }}
               >
-                <span className="filter-icon">🍽️</span>
+                <span className="filter-icon">🥖</span>
                 <span className="filter-text">Todos</span>
               </button>
               {categorias.map((categoria) => (
@@ -666,11 +692,31 @@ function MainPage({
         />
       )}
 
+      {/* Sección de Nosotros */}
+      <section id="nosotros" className="nosotros-section">
+        <div className="container">
+          <h2>Nosotros</h2>
+          <div className="nosotros-content">
+            <p>
+              En Panadería Delicias llevamos más de 25 años horneando los mejores productos 
+              con recetas tradicionales y ingredientes frescos de la más alta calidad.
+            </p>
+            <p>
+              Nuestro compromiso es brindar a nuestros clientes productos artesanales 
+              elaborados con amor y dedicación, manteniendo la tradición familiar 
+              que nos caracteriza.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Sección de Testimonios */}
       <TestimonialsSection />
 
       {/* Footer */}
-      <Footer />
+      <section id="contacto">
+        <Footer />
+      </section>
     </div>
   );
 }
@@ -705,7 +751,7 @@ function ProductoCard({
             className="btn-add-to-cart"
             disabled={producto.stock === 0}
           >
-            {producto.stock === 0 ? "Sin Stock" : "Add"}
+            {producto.stock === 0 ? "Sin Stock" : "Agregar"}
           </button>
         </div>
       </div>
@@ -823,9 +869,10 @@ function LoginModal({
           console.warn("No se recibió token válido del backend:", response.data);
         }
 
+        // Usar los datos que devuelva el login
         console.log("Datos completos del usuario del backend:", response.data);
         onLogin({
-          id: response.data.id || response.data.usuario?.id, 
+          id: response.data.id || response.data.usuario?.id, // Intentar obtener el ID real del backend
           nombre: response.data.nombre || response.data.usuario?.nombre || formData.email.split("@")[0],
           apellido: response.data.apellido || response.data.usuario?.apellido,
           email: formData.email,
@@ -861,10 +908,7 @@ function LoginModal({
         typeof error === "object" &&
         error !== null &&
         "response" in error &&
-        typeof (error as any).response === "object" &&
-        (error as any).response !== null &&
-        "status" in (error as any).response &&
-        (error as any).response.status === 400
+        (error as any).response?.status === 400
       ) {
         alert("Credenciales inválidas o email ya registrado");
       } else {
@@ -886,7 +930,7 @@ function LoginModal({
 
         <div className="modal-content">
           <h2>{isLogin ? "Iniciar Sesión" : "Registrarse"}</h2>
-          <p>Para completar tu pedido</p>
+          <p>Para completar tu pedido en la panadería</p>
 
           {isLogin && (
             <>
@@ -978,46 +1022,45 @@ function TestimonialsSection() {
   return (
     <section className="testimonials">
       <div className="container">
-        <h2>What people say about us</h2>
+        <h2>Lo que dicen nuestros clientes</h2>
         <div className="testimonials-grid">
           <div className="testimonial">
             <div className="rating">⭐⭐⭐⭐⭐</div>
             <p>
-              "I liked it very much, I will come back soon, really amazing food"
+              "El mejor pan de la ciudad, siempre fresco y delicioso. Vengo todas las mañanas por mis croissants favoritos."
             </p>
             <div className="author">
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"
-                alt="Ivan Petrov"
+                alt="Carlos Mendoza"
               />
-              <span>Ivan Petrov</span>
+              <span>Carlos Mendoza</span>
             </div>
           </div>
           <div className="testimonial">
             <div className="rating">⭐⭐⭐⭐⭐</div>
             <p>
-              "I loved it so very much, I will come back soon, really taste
-              food"
+              "Los pasteles son increíbles, especialmente el tres leches. La atención al cliente es excelente."
             </p>
             <div className="author">
               <img
                 src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face"
-                alt="Pepa Petrov"
+                alt="María González"
               />
-              <span>Pepa Petrov</span>
+              <span>María González</span>
             </div>
           </div>
           <div className="testimonial">
             <div className="rating">⭐⭐⭐⭐⭐</div>
             <p>
-              "I liked it very much, I will come back soon, really taste food"
+              "Tradición familiar que se nota en cada producto. Los empanados son mi debilidad, ¡no puedo resistirme!"
             </p>
             <div className="author">
               <img
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face"
-                alt="Ivan Petrov"
+                alt="Diego Ramírez"
               />
-              <span>Ivan Petrov</span>
+              <span>Diego Ramírez</span>
             </div>
           </div>
         </div>
@@ -1033,51 +1076,51 @@ function Footer() {
       <div className="container">
         <div className="footer-content">
           <div className="contact-section">
-            <h3>Contact to us:</h3>
-            <p>Contact us to at a convenient way</p>
+            <h3>Contáctanos:</h3>
+            <p>Comunícate con nosotros de manera conveniente</p>
             <div className="contact-info">
               <p>
-                <strong>Phone:</strong> +593 32 345 19 30
+                <strong>Teléfono:</strong> +593 2 456 78 90
               </p>
               <p>
-                <strong>Schedule:</strong> 9:00 - 20:00 daily
+                <strong>Horarios:</strong> 6:00 - 20:00 diario
               </p>
             </div>
-            <button className="btn-request-call">Request a call</button>
+            <button className="btn-request-call">Solicitar llamada</button>
           </div>
 
           <div className="contact-form">
-            <h4>Enter your contact:</h4>
+            <h4>Déjanos tus datos:</h4>
             <form>
-              <input type="text" placeholder="Name" />
-              <input type="tel" placeholder="Your phone number" />
-              <textarea placeholder="Enter message:"></textarea>
-              <button type="submit">Send</button>
+              <input type="text" placeholder="Nombre" />
+              <input type="tel" placeholder="Tu número de teléfono" />
+              <textarea placeholder="Escribe tu mensaje:"></textarea>
+              <button type="submit">Enviar</button>
             </form>
           </div>
         </div>
 
         <div className="footer-bottom">
           <div className="footer-logo">
-            <span className="logo-icon">🍽️</span>
-            <span>UPTOWN</span>
+            <span className="logo-icon">🥖</span>
+            <span>PANADERÍA DELICIAS</span>
           </div>
           <div className="footer-links">
             <div className="link-group">
-              <h4>About us</h4>
-              <a href="#">Story</a>
-              <a href="#">Menu</a>
-              <a href="#">Team</a>
+              <h4>Nosotros</h4>
+              <a href="#">Historia</a>
+              <a href="#">Productos</a>
+              <a href="#">Equipo</a>
             </div>
             <div className="link-group">
-              <h4>Services</h4>
+              <h4>Servicios</h4>
               <a href="#">Delivery</a>
-              <a href="#">Booking</a>
-              <a href="#">Catering</a>
+              <a href="#">Reservas</a>
+              <a href="#">Eventos</a>
             </div>
             <div className="link-group">
-              <h4>Schedule</h4>
-              <p>Mo - Su: 9:00 - 20:00</p>
+              <h4>Horarios</h4>
+              <p>Lun - Dom: 6:00 - 20:00</p>
               <div className="social-links">
                 <span>📘</span>
                 <span>📷</span>
@@ -1138,14 +1181,18 @@ function CheckoutModal({
     <div className="modal-overlay">
       <div className="checkout-modal">
         <button className="close-btn" onClick={onClose}>×</button>
+
         <div className="checkout-content">
           <h2>Confirmar Pedido</h2>
+
+          {/* Cliente Info */}
           <div className="cliente-info">
             <h3>Cliente: {usuario.nombre} {usuario.apellido || ''}</h3>
             <p>{usuario.email}</p>
           </div>
 
           <div className="checkout-main">
+            {/* Columna 1: Buscador y productos en el carrito */}
             <div className="checkout-column">
               <div className="checkout-section">
                 <h3>Agregar productos</h3>
