@@ -145,7 +145,6 @@ html, body {
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   align-items: center;
-  margin-left: 80px;
 }
 
 .hero-text h1 {
@@ -1464,6 +1463,9 @@ html, body {
     grid-template-columns: 1fr;
     text-align: center;
     gap: 2rem;
+  }
+  .hero-text {
+    align-items: center;
   }
 
   .hero-text h1 {
